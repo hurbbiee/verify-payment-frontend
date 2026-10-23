@@ -1,0 +1,94 @@
+@if (result(); as response) {
+  <section class="card" aria-label="ผลตรวจสลิปจริง">
+    <h3>{{ response.status === 'DUPLICATE' ? 'พบประวัติตรวจสลิปซ้ำ' : 'ตรวจสอบพบธุรกรรม' }}</h3>
+    <dl class="details">
+      <div>
+        <dt>ธนาคารต้นทาง</dt>
+        <dd>{{ response.data.sender.bank ?? 'ไม่มีข้อมูล' }}</dd>
+      </div>
+      <div>
+        <dt>ธนาคารปลายทาง</dt>
+        <dd>{{ response.data.receiver.bank ?? 'ไม่มีข้อมูล' }}</dd>
+      </div>
+      <div>
+        <dt>ผู้โอน</dt>
+        <dd>{{ response.data.sender.name ?? 'ไม่มีข้อมูล' }}</dd>
+      </div>
+      <div>
+        <dt>ผู้รับ</dt>
+        <dd>{{ response.data.receiver.name ?? 'ไม่มีข้อมูล' }}</dd>
+      </div>
+      <div>
+        <dt>บัญชีผู้โอน</dt>
+        <dd>{{ response.data.sender.account ?? 'ไม่มีข้อมูล' }}</dd>
+      </div>
+      <div>
+        <dt>บัญชีผู้รับ</dt>
+        <dd>{{ response.data.receiver.account ?? 'ไม่มีข้อมูล' }}</dd>
+      </div>
+      <div>
+        <dt>วันเวลาจากผู้ให้บริการ</dt>
+        <dd>{{ response.data.transferDateTime ?? 'ไม่มีข้อมูล' }}</dd>
+      </div>
+      <div>
+        <dt>เลขอ้างอิง</dt>
+        <dd>{{ response.data.transactionRef ?? 'ไม่มีข้อมูล' }}</dd>
+      </div>
+    </dl>
+    <div class="amount">
+      <p>จำนวนเงิน</p>
+      <strong>{{ formatAmount(response.data.amount, response.data.currency) }}</strong>
+    </div>
+    <p>
+      ผลตรวจธุรกรรมไม่ได้ยืนยันการชำระเงินสำหรับคำสั่งซื้อ
+      และประวัติตรวจซ้ำไม่ได้หมายความว่ามีการใช้ชำระเงินซ้ำ
+    </p>
+  </section>
+} @else {
+  <section class="card" aria-label="ตัวอย่างผลตรวจสอบ">
+    <div class="heading">
+      <h3>ตัวอย่างผลตรวจสอบ</h3>
+      <span class="badge">สำหรับทดสอบ UI</span>
+    </div>
+    <div class="status">
+      <span aria-hidden="true">✓</span>
+      <div>
+        <strong>ตัวอย่าง: พบธุรกรรมที่ตรวจสอบได้</strong>
+        <p>ข้อมูลด้านล่างเป็นข้อมูลสมมติ ไม่ได้อ่านจากรูปสลิป</p>
+      </div>
+    </div>
+    <dl class="details">
+      <div>
+        <dt>ธนาคารต้นทาง</dt>
+        <dd>กสิกรไทย</dd>
+      </div>
+      <div>
+        <dt>ธนาคารปลายทาง</dt>
+        <dd>ไทยพาณิชย์</dd>
+      </div>
+      <div>
+        <dt>ผู้โอน</dt>
+        <dd>นาย ทดสอบ ระบบ</dd>
+      </div>
+      <div>
+        <dt>ผู้รับ</dt>
+        <dd>นาย ตัวอย่าง ผู้รับ</dd>
+      </div>
+      <div>
+        <dt>วันที่โอน</dt>
+        <dd>23 ต.ค. 2569</dd>
+      </div>
+      <div>
+        <dt>เวลา</dt>
+        <dd>10:30 น.</dd>
+      </div>
+    </dl>
+    <div class="amount">
+      <p>จำนวนเงินที่โอน (สมมติ)</p>
+      <strong>฿1,500.00</strong>
+    </div>
+    <p class="disclaimer">
+      นี่เป็นตัวอย่าง UX เท่านั้น ยังไม่ได้เชื่อมต่อ API ตรวจสลิปจริง และไม่ใช่ผลยืนยันการชำระเงิน
+    </p>
+  </section>
+}
