@@ -1,0 +1,32 @@
+<div class="upload-container" [class.dragging]="dragging()" [class.disabled]="disabled()"
+  (dragover)="dragOver($event)" (dragleave)="dragging.set(false)" (drop)="drop($event)">
+  <input #picker class="file-input" type="file" accept="image/jpeg,image/png,image/webp"
+    [disabled]="disabled()" (change)="select($event)" aria-label="เลือกรูปสลิป" aria-describedby="file-help file-error" />
+  @if (imageUrl(); as url) {
+    <div class="image-box">
+      <img [src]="url" [alt]="'สลิปที่เลือก: ' + fileName()" />
+      <div class="actions">
+        <button type="button" class="action replace" [disabled]="disabled()" (click)="picker.click()" aria-label="เลือกรูปใหม่" title="เลือกรูปใหม่">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+            <path d="M7 16a5 5 0 1 1 1-9 6 6 0 0 1 11 3 4 4 0 0 1-1 8M12 21V12m-4 4 4-4 4 4" />
+          </svg>
+        </button>
+        <button type="button" class="action delete" [disabled]="disabled()" (click)="remove()" aria-label="ลบรูป" title="ลบรูป">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+            <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  } @else {
+    <button type="button" class="dropzone" [disabled]="disabled()" (click)="picker.click()">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+        <path d="M7 16a5 5 0 1 1 1-9 6 6 0 0 1 11 3 4 4 0 0 1-1 8M12 21V12m-4 4 4-4 4 4" />
+      </svg>
+      <strong>ลากไฟล์สลิปมาวางที่นี่</strong><span>หรือคลิกเพื่อเลือกไฟล์จากอุปกรณ์</span>
+      <small>JPG / PNG / WebP · สูงสุด 4 MB</small>
+    </button>
+  }
+</div>
+<span id="file-help" class="sr-only">รองรับ JPG PNG WebP ขนาดไม่เกิน 4 MB</span>
+<p id="file-error" role="alert">{{ error() }}</p>

@@ -1,0 +1,57 @@
+<main class="shell">
+  <header>
+    <div class="brand"><span class="shield" aria-hidden="true">✓</span><div><h1>SlipCheck</h1><small>Bank Slip Verification</small></div></div>
+    <span class="badge connection" [class.ready]="connection() === 'ready'" [class.offline]="connection() === 'offline'" role="status" title="สถานะการเชื่อมต่อ Express API">{{ connection() === 'ready' ? 'พร้อมใช้งาน' : connection() === 'offline' ? 'เชื่อมต่อไม่ได้' : 'กำลังเชื่อมต่อ...' }}</span>
+  </header>
+  <section aria-labelledby="upload-title">
+    <div class="title-row"><h2 id="upload-title">ตรวจสอบสลิปโอนเงิน</h2><span class="usage-badge" aria-live="polite">@if (usage(); as quota) { ใช้ไป {{ quota.used }} / {{ quota.max === null ? 'ไม่จำกัด' : quota.max }} ครั้ง · รอบปัจจุบัน } @else { {{ usageState() }} }</span></div>
+    <p class="intro">อัปโหลดสลิปเพื่อส่งตรวจธุรกรรมผ่าน Thunder</p>
+        <app-input-upload [disabled]="loading()" [imageUrl]="preview()" [fileName]="file()?.name ?? ''" (fileSelected)="select($event)" />
+@if (qrResult(); as qr) {
+            <section class="qr-result" aria-label="ผลอ่านข้อมูล QR">
+        <div class="qr-heading">
+          <div><span class="eyebrow">QR INSPECTOR</span><h3>ข้อมูลจากสลิปของคุณ</h3><p>อ่านข้อมูลภายใน QR สำเร็จ · {{ qr.data.byteLength }} bytes</p></div>
+          <span class="status-pill neutral">ยังไม่ยืนยันธุรกรรม</span>
+        </div>
+        @if (qr.data.decoded; as decoded) {
+          <dl class="decoded-grid">
+            <div><dt>API ID</dt><dd class="mono">{{ decoded.apiId }}</dd></div>
+            <div><dt>รหัสธนาคารผู้ส่ง</dt><dd class="mono">{{ decoded.sendingBankCode }}</dd></div>
+            <div class="full"><dt>เลขอ้างอิงธุรกรรม</dt><dd class="mono reference">{{ decoded.transactionRef }}</dd></div>
+            <div><dt>ประเทศ</dt><dd>{{ decoded.countryCode }}</dd></div>
+            <div><dt>ความสอดคล้องของรหัส (CRC)</dt><dd><span class="status-pill" [class.good]="decoded.checksum?.valid === true" [class.bad]="decoded.checksum?.valid === false">{{ decoded.checksum ? (decoded.checksum.valid ? 'CRC ตรงกัน' : 'CRC ไม่ตรงกัน') : 'ยังตรวจไม่ได้' }}</span></dd></div>
+          </dl>
+        } @else {
+          <p class="info-box">ยังไม่ตรงกับรูปแบบ Mini QR ที่รองรับ จึงแสดงเฉพาะข้อมูลดิบโดยไม่เดาความหมาย</p>
+        }
+        <div class="info-box"><strong>ข้อมูลอ้างอิงจาก QR เท่านั้น</strong><p>CRC ตรงกันไม่ได้ยืนยันว่าโอนเงินจริง ยอดเงิน ชื่อผู้โอน ผู้รับ และวันเวลา ยังยืนยันไม่ได้จากข้อมูลส่วนนี้</p></div>
+        <details class="technical">
+          <summary>ดูข้อความดิบจาก QR <span>{{ qr.data.byteLength }} bytes</span></summary>
+          <pre>{{ qr.data.payload }}</pre>
+        </details>
+        @if (qr.data.inspection; as inspection) {
+          <details class="technical">
+            <summary>ดูโครงสร้างข้อมูล <span>{{ inspection.format }}</span></summary>
+            <p>{{ inspection.note }}</p>
+            @for (field of inspection.fields; track $index) {
+              <div class="qr-field"><div class="field-label"><strong>Tag {{ field.id }}</strong><span>{{ field.length }} bytes</span></div><pre>{{ field.value }}</pre></div>
+            }
+          </details>
+        }
+        <p class="local-note">ประมวลผลใน backend ของคุณ · ไม่เรียกบริการตรวจธุรกรรมภายนอก</p>
+      </section>
+    } @else if (showDemoResult() || result()) {
+      <app-slip-result [result]="result()" />
+    } @else {
+    <div class="notes"><p><span aria-hidden="true">ⓘ</span> ไม่ต้องกรอกชื่อผู้โอน จำนวนเงิน หรือเวลาที่โอนเอง</p><p><span aria-hidden="true">♧</span> ข้อมูลถูกส่งไปตรวจสอบผ่าน Backend API</p></div>
+    <label class="notice"><input type="checkbox" [checked]="demoMode()" [disabled]="loading()" (change)="setDemoMode($any($event.target).checked)" /> โหมดตัวอย่าง UI — แสดงข้อมูลสมมติ ไม่ส่งรูปไป API (เฉพาะ development)</label>
+    <button class="verify" type="button" [disabled]="!file() || loading()" (click)="submit()">
+      {{ loading() ? 'กำลังส่งสลิป...' : demoMode() ? 'เช็คสลิป · ดูผลตัวอย่าง' : 'ตรวจสอบสลิปผ่าน Thunder' }}
+    </button>
+    <p class="notice">รูปจะถูกส่งให้ Thunder ผ่าน backend เพื่อใช้บริการตรวจสลิปตามโควต้าบัญชี</p>
+    <p class="result" [class.error]="failed()" role="status" aria-live="polite">{{ message() }}</p>
+
+    }
+  </section>
+  <footer>การตรวจสอบธุรกรรมไม่ได้ยืนยันว่าคำสั่งซื้อได้รับการชำระเงินแล้ว</footer>
+</main>
